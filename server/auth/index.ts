@@ -1,6 +1,10 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import session from "express-session";
+import ConnectPgSimple from "connect-pg-simple";
+import { pool } from "../db";
 import { authStorage } from "./storage";
+
+const PgSession = ConnectPgSimple(session);
 
 declare global {
   namespace Express {
@@ -17,8 +21,18 @@ declare global {
 }
 
 export async function setupAuth(app: Express) {
+  // Use PostgreSQL session store if DATABASE_URL is available
+  const sessionStore = process.env.DATABASE_URL
+    ? new PgSession({
+        pool: pool,
+        tableName: "sessions",
+        createTableIfMissing: true,
+      })
+    : undefined;
+
   app.use(
     session({
+      store: sessionStore,
       secret: process.env.SESSION_SECRET || "dev-secret-change-in-production",
       resave: false,
       saveUninitialized: false,
