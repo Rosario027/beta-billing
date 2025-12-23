@@ -5,8 +5,14 @@ import {
   createInvoiceSchema,
   clients,
   customers,
-  invoices
+  invoices,
+  type InsertClient,
+  type InsertCustomer,
+  type CreateInvoiceRequest
 } from './schema';
+
+// Re-export types for convenience
+export type { InsertClient, InsertCustomer, CreateInvoiceRequest };
 
 // ============================================
 // SHARED ERROR SCHEMAS

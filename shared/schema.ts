@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, numeric, date } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, numeric } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -11,12 +11,12 @@ import { users } from "./models/auth";
 
 export const clients = pgTable("clients", {
   id: serial("id").primaryKey(),
-  userId: text("user_id").notNull().references(() => users.id), // The CA who owns this client
-  name: text("name").notNull(), // Trade/Legal Name
+  userId: text("user_id").notNull().references(() => users.id),
+  name: text("name").notNull(),
   gstin: text("gstin").notNull(),
   address: text("address").notNull(),
   invoicePrefix: text("invoice_prefix").default("INV-"),
-  bankDetails: text("bank_details"), // Simple text for MVP
+  bankDetails: text("bank_details"),
   logoUrl: text("logo_url"),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -25,7 +25,7 @@ export const customers = pgTable("customers", {
   id: serial("id").primaryKey(),
   clientId: integer("client_id").notNull().references(() => clients.id),
   name: text("name").notNull(),
-  gstin: text("gstin"), // Optional for B2C
+  gstin: text("gstin"),
   address: text("address"),
   email: text("email"),
   phone: text("phone"),
@@ -41,7 +41,7 @@ export const invoices = pgTable("invoices", {
   dueDate: timestamp("due_date"),
   placeOfSupply: text("place_of_supply"),
   status: text("status", { enum: ["draft", "sent", "paid", "cancelled"] }).default("draft"),
-  subtotal: numeric("subtotal").notNull(), // Storing as numeric for simplicity in this MVP, ideally integer minor units
+  subtotal: numeric("subtotal").notNull(),
   taxTotal: numeric("tax_total").notNull(),
   total: numeric("total").notNull(),
   isB2C: boolean("is_b2c").default(false),
@@ -55,8 +55,8 @@ export const invoiceItems = pgTable("invoice_items", {
   hsn: text("hsn"),
   quantity: numeric("quantity").notNull(),
   rate: numeric("rate").notNull(),
-  amount: numeric("amount").notNull(), // quantity * rate
-  gstRate: numeric("gst_rate").notNull(), // e.g. 5, 12, 18, 28
+  amount: numeric("amount").notNull(),
+  gstRate: numeric("gst_rate").notNull(),
   igst: numeric("igst").default("0"),
   cgst: numeric("cgst").default("0"),
   sgst: numeric("sgst").default("0"),

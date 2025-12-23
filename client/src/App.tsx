@@ -6,11 +6,63 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/use-auth";
 import { Layout } from "@/components/Layout";
 import { Loader2 } from "lucide-react";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 import Dashboard from "@/pages/Dashboard";
-import NotFound from "@/pages/not-found";
-import ClientCreate from "@/pages/ClientCreate";
-import CustomersList from "@/pages/CustomersList";
+import InvoiceCreate from "@/pages/InvoiceCreate";
+
+function LoginForm() {
+  const [email, setEmail] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+        credentials: "include",
+      });
+      if (res.ok) {
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error("Login failed:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <Card className="w-full max-w-md">
+      <CardHeader>
+        <CardTitle>Welcome to TaxFlow</CardTitle>
+        <CardDescription>Enter your email to continue</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleLogin} className="space-y-4">
+          <Input
+            type="email"
+            placeholder="your.email@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Continue"}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+
+function PrivateRouter() {"@/pages/CustomersList";
 import InvoicesList from "@/pages/InvoicesList";
 import InvoiceCreate from "@/pages/InvoiceCreate";
 
@@ -29,15 +81,11 @@ function PrivateRouter() {
   }
 
   if (!user) {
-    // Replit Auth flow: handled by backend/frontend hooks, but if we're here
-    // and not user, we show a public landing or redirect
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-6">
         <h1 className="text-4xl font-display font-bold text-primary">TaxFlow</h1>
         <p className="text-muted-foreground">Secure GST Invoicing for CAs</p>
-        <a href="/api/login" className="px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium shadow-lg hover:shadow-xl transition-all">
-          Login with Replit
-        </a>
+        <LoginForm />
       </div>
     );
   }
